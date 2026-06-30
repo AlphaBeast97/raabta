@@ -11,7 +11,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-// Define the public directory path
 const publicDir = path.join(process.cwd(), "public");
 
 dotenv.config();
@@ -23,7 +22,6 @@ app.get("/health", (res) => {
   res.status(200).json({ status: "ok" });
 });
 
-// Check if the public directory exists
 if (fs.existsSync(publicDir)) {
   app.use(express.static(publicDir));
 
