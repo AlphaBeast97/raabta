@@ -18,7 +18,7 @@ app.use(clerkMiddleware());
 app.use(express.json());
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 
-app.get("/health", (res) => {
+app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
