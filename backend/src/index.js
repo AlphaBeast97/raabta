@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { clerkMiddleware } from "@clerk/express";
 import { connectDB } from "./lib/db.js";
-import { fs } from "fs";
-import { path } from "path";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 
