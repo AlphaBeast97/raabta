@@ -6,15 +6,22 @@ import { connectDB } from "./lib/db.js";
 import fs from "fs";
 import path from "path";
 import job from "./lib/cron.js";
+import clerkWebhook from "./webhooks/clerk.webhook.js";
 
 const app = express();
+dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 const publicDir = path.join(process.cwd(), "public");
 
-dotenv.config();
+app.use(
+  "/api/webhooks/clerk",
+  express.raw({ type: "application/json" }),
+  clerkWebhook,
+);
+
 app.use(clerkMiddleware());
 app.use(express.json());
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
