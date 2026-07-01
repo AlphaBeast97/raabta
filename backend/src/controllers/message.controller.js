@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import { hasImageKitConfig, uploadChatMedia } from "../lib/imagekit.js";
+import { getReceiverSocketId } from "../lib/socket.js";
 
 export const getUsersForSidebar = async (req, res) => {
   try {
@@ -124,7 +125,11 @@ export const setMessages = async (req, res) => {
     });
     await newMessage.save();
 
-    //   todo: Emit the new message to the receiver using socket.io (if implemented)
+    // Emit the new message to the receiver if they are online
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
 
     res.status(201).json({ newMessage });
   } catch (error) {
