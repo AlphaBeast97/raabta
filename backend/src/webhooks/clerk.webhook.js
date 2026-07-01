@@ -8,7 +8,7 @@ router.post("/", async (req, res) => {
   try {
     const signingSecret = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
     if (!signingSecret) {
-      return res.status(500).json({ error: "Signing secret not configured" });
+      return res.status(503).json({ error: "Signing secret not configured" });
     }
 
     const payload = Buffer.isBuffer(req.body)
