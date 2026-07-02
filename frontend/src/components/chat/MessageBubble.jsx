@@ -8,6 +8,7 @@ export function MessageBubble({ message }) {
   const isOwnMessage = message.role === "me";
   const hasImage = Boolean(message.imageUrl);
   const hasVideo = Boolean(message.videoUrl);
+  const hasAudio = Boolean(message.audioUrl);
 
   return (
     <div
@@ -28,6 +29,14 @@ export function MessageBubble({ message }) {
           />
         ) : null}
         {hasVideo ? <MessageVideo src={message.videoUrl} /> : null}
+        {hasAudio ? (
+          <audio
+            src={message.audioUrl}
+            controls
+            preload="metadata"
+            className="mb-1.5 h-10 max-w-full rounded-lg"
+          />
+        ) : null}
         {message.text ? (
           <p className="whitespace-pre-wrap wrap-break-word">{message.text}</p>
         ) : null}

@@ -102,6 +102,7 @@ export const setMessages = async (req, res) => {
 
     let imageUrl = null;
     let videoUrl = null;
+    let audioUrl = null;
 
     if (req.file) {
       if (!hasImageKitConfig()) {
@@ -116,6 +117,8 @@ export const setMessages = async (req, res) => {
         imageUrl = url;
       } else if (req.file.mimetype.startsWith("video/")) {
         videoUrl = url;
+      } else if (req.file.mimetype.startsWith("audio/")) {
+        audioUrl = url;
       }
     }
 
@@ -125,6 +128,7 @@ export const setMessages = async (req, res) => {
       text,
       image: imageUrl,
       video: videoUrl,
+      audio: audioUrl,
     });
     await newMessage.save();
 

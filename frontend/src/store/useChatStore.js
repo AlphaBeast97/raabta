@@ -4,6 +4,11 @@ import axiosInstance from "../lib/axios";
 import { useAuthStore } from "./useAuthStore";
 import { toast } from "react-hot-toast";
 
+let mediaRecorderRef = null;
+let audioChunksRef = [];
+let timerRef = null;
+let shouldSend = true;
+
 export const useChatStore = create(
   persist(
     (set, get) => ({
@@ -20,6 +25,8 @@ export const useChatStore = create(
       composerText: "",
       isSoundEnabled: true,
       isSendingMedia: false,
+      isRecording: false,
+      recordingDuration: 0,
 
       getUsers: async () => {
         set({ isUserLoading: true });
@@ -95,6 +102,81 @@ export const useChatStore = create(
             },
           );
           return false;
+        }
+      },
+
+      startRecording: async () => {
+        const state = get();
+        if (state.isRecording) return;
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          const mediaRecorder = new MediaRecorder(stream, {
+            mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+              ? "audio/webm;codecs=opus"
+              : "audio/webm",
+          });
+
+          shouldSend = true;
+          audioChunksRef = [];
+          mediaRecorderRef = mediaRecorder;
+
+          mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) audioChunksRef.push(e.data);
+          };
+
+          mediaRecorder.onstop = async () => {
+            stream.getTracks().forEach((t) => t.stop());
+
+            set({ recordingDuration: 0 });
+
+            if (!shouldSend) return;
+
+            const blob = new Blob(audioChunksRef, {
+              type: mediaRecorder.mimeType,
+            });
+            const file = new File([blob], `voice-${Date.now()}.webm`, {
+              type: mediaRecorder.mimeType,
+            });
+
+            await get().sendMediaMessage(get().activeConversationId, file);
+          };
+
+          mediaRecorder.start();
+          set({ isRecording: true, recordingDuration: 0 });
+
+          timerRef = setInterval(() => {
+            set((s) => ({ recordingDuration: s.recordingDuration + 1 }));
+          }, 1000);
+        } catch {
+          set({ isRecording: false });
+          toast.error("Microphone access denied or unavailable");
+        }
+      },
+
+      stopRecording: () => {
+        shouldSend = true;
+        if (mediaRecorderRef && mediaRecorderRef.state !== "inactive") {
+          mediaRecorderRef.stop();
+        }
+        set({ isRecording: false });
+        if (timerRef) {
+          clearInterval(timerRef);
+          timerRef = null;
+        }
+      },
+
+      cancelRecording: () => {
+        shouldSend = false;
+        if (mediaRecorderRef && mediaRecorderRef.state !== "inactive") {
+          mediaRecorderRef.stop();
+        }
+        set({ isRecording: false, recordingDuration: 0 });
+        if (timerRef) {
+          clearInterval(timerRef);
+          timerRef = null;
         }
       },
 
