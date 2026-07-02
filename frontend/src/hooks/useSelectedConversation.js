@@ -1,0 +1,65 @@
+import { useMediaQuery } from "./useMedaiQuery";
+import { formatMessageTime } from "../lib/utils";
+import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "../store/useAuthStore";
+
+export const getInitials = (name) => {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((namePart) => namePart[0])
+    .join("");
+};
+
+const mapUserToConversation = ({ user, messages, authUser, onlineUsers }) => {
+  const mappedMessages = messages.map((message) => ({
+    id: message._id,
+    role: String(message.senderId) === String(authUser?._id) ? "me" : "them",
+    text: message.text || "",
+    time: formatMessageTime(message.createdAt),
+    imageUrl: message.image,
+    videoUrl: message.video,
+  }));
+
+  return {
+    id: user._id,
+    peer: {
+      name: user.fullName,
+      subtitle: user.email,
+      isOnline: onlineUsers.includes(user._id),
+      avatarUrl: user.profilePic,
+      initials: getInitials(user.fullName),
+    },
+    messages: mappedMessages,
+  };
+};
+
+export const useSelectedConversation = () => {
+  const activeConversationId = useChatStore(
+    (state) => state.activeConversationId,
+  );
+  const conversations = useChatStore((state) => state.conversations);
+  const users = useAuthStore((state) => state.users);
+  const messages = useChatStore((state) => state.messages);
+
+  const authUser = useAuthStore((state) => state.user);
+  const onlineUsers = useAuthStore((state) => state.onlineUsers);
+
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
+
+  const selectedUser = activeConversationId
+    ? users.find((user) => user._id === activeConversationId) ||
+      conversations.find((user) => user._id === activeConversationId)
+    : null;
+
+  const activeConversation = selectedUser
+    ? mapUserToConversation({
+        user: selectedUser,
+        messages,
+        authUser,
+        onlineUsers,
+      })
+    : null;
+
+  return { activeConversation, activeConversationId, isLargeScreen };
+};
