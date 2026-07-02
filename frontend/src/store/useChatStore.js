@@ -74,7 +74,7 @@ export const useChatStore = create((set, get) => ({
         messagesData,
       );
 
-      set({ messages: [...messages, res.data], composerText: "" });
+      set({ messages: [...messages, res.data.newMessage], composerText: "" });
 
       get().getConversations();
       return true;
