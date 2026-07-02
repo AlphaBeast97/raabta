@@ -35,10 +35,7 @@ function ChatComposer() {
     event.target.value = "";
     if (!file) return;
 
-    const didSendMessage = await sendMediaMessage({
-      conversationId: activeConversationId,
-      file,
-    });
+    const didSendMessage = await sendMediaMessage(activeConversationId, file);
 
     if (didSendMessage) playSoundIfEnabled();
   };
