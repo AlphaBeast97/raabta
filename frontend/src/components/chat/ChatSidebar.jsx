@@ -53,7 +53,7 @@ const ChatSidebar = () => {
   const allUsers = users.map((user) => mapUserForList(user, onlineUsers));
 
   const filteredConversations = normalizedSearchQuery
-    ? conversationUser.filter((converation) =>
+    ? conversationUser.filter((conversation) =>
         conversation.peer.name.toLowerCase().includes(normalizedSearchQuery),
       )
     : conversationUser;

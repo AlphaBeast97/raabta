@@ -39,10 +39,10 @@ export const useSelectedConversation = () => {
     (state) => state.activeConversationId,
   );
   const conversations = useChatStore((state) => state.conversations);
-  const users = useAuthStore((state) => state.users);
+  const users = useChatStore((state) => state.users);
   const messages = useChatStore((state) => state.messages);
 
-  const authUser = useAuthStore((state) => state.user);
+  const authUser = useAuthStore((state) => state.authUser);
   const onlineUsers = useAuthStore((state) => state.onlineUsers);
 
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
