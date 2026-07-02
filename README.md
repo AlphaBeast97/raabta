@@ -217,4 +217,4 @@ Express serves the SPA's static files from `./public` in production. Designed fo
 
 ## About the Name
 
-Raabta (राब्ता) is a Hindi/Urdu word meaning *connection* or *relationship*.
+Raabta (رابطہ) is an Urdu word meaning *connection* or *relationship*.
