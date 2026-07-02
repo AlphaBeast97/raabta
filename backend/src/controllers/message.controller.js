@@ -1,7 +1,7 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import { hasImageKitConfig, uploadChatMedia } from "../lib/imagekit.js";
-import { getReceiverSocketId } from "../lib/socket.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 
 export const getUsersForSidebar = async (req, res) => {
   try {
@@ -26,7 +26,7 @@ export const getConversationsForSidebar = async (req, res) => {
       {
         //   1- Filter messages where the logged-in user is either the sender or receiver
         $match: {
-          $or: [{ sender: loggedInUserId }, { receiver: loggedInUserId }],
+          $or: [{ senderId: loggedInUserId }, { receiverId: loggedInUserId }],
         },
       },
       //   2- Group messages by the other user's ID and get the latest message timestamp
@@ -34,7 +34,7 @@ export const getConversationsForSidebar = async (req, res) => {
         $group: {
           _id: {
             $cond: [
-              { $eq: ["$sender", loggedInUserId] },
+              { $eq: ["$senderId", loggedInUserId] },
               "$receiverId",
               "$senderId",
             ],
@@ -53,6 +53,9 @@ export const getConversationsForSidebar = async (req, res) => {
           as: "user",
         },
       },
+
+      //   4.1- Match only those conversations where the user details exist
+      { $match: { "user.0": { $exists: true } } },
       //   5- Replace the root with the user details and exclude the clerkId field
       {
         $replaceRoot: {
@@ -79,8 +82,8 @@ export const getMessages = async (req, res) => {
 
     const messages = await Message.find({
       $or: [
-        { sender: myId, receiver: userToChatId },
-        { sender: userToChatId, receiver: myId },
+        { senderId: myId, receiverId: userToChatId },
+        { senderId: userToChatId, receiverId: myId },
       ],
     }).sort({ createdAt: 1 });
 
